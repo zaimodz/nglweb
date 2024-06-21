@@ -5,6 +5,38 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>NGL Message Sender</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.0.1/socket.io.min.js"></script>
+    <style>
+        .console-container {
+            width: 100%;
+            max-width: 800px;
+            background-color: rgba(43, 46, 74, 0.7);
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.5);
+            margin-top: 20px;
+            padding: 10px; /* Reduce padding for smaller size */
+            overflow-y: auto;
+            height: 100px; /* Adjust height as needed */
+            scrollbar-width: none;
+            -ms-overflow-style: none;
+        }
+
+        .console-container::-webkit-scrollbar {
+            display: none;
+        }
+
+        #consoleLogs {
+            padding: 0;
+            margin: 0;
+            list-style-type: none;
+        }
+
+        #consoleLogs li {
+            margin-bottom: 5px; /* Adjust margin */
+            color: #00FF00;
+            font-family: 'Courier New', Courier, monospace;
+        }
+    </style>
 </head>
 <body>
     <div class="container">
@@ -20,11 +52,23 @@
             <label for="count">Count:</label>
             <input type="number" id="count" name="count" required><br>
             <div class="use-proxy">
-                <label for="use_proxy">Use proxy:</label>
-                <input type="checkbox" id="use_proxy" name="use_proxy">
             </div>
             <button type="submit">Send Messages</button>
         </form>
+        <div class="console-container">
+            <ul id="consoleLogs"></ul>
+        </div>
     </div>
+    <script>
+        const socket = io();
+
+        socket.on('log', function(data) {
+            const consoleLogs = document.getElementById('consoleLogs');
+            const logItem = document.createElement('li');
+            logItem.textContent = data.message;
+            consoleLogs.appendChild(logItem);
+            consoleLogs.scrollTop = consoleLogs.scrollHeight;
+        });
+    </script>
 </body>
 </html>
