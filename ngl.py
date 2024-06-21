@@ -2,7 +2,7 @@ import random
 import string
 import requests
 import os
-from pystyle import Colors, Colorate
+from flask_socketio import SocketIO
 
 def deviceId():
     characters = string.ascii_lowercase + string.digits
@@ -25,15 +25,15 @@ def Proxy():
     random_proxy = random.choice(proxies_list).strip()
     return {'http': random_proxy, 'https': random_proxy}
 
-def ngl(nglusername, message, count, use_proxy):
+def ngl(nglusername, message, count, use_proxy, socketio):
     if use_proxy:
         proxies = Proxy()
     else:
         proxies = None
 
-    value = 0
+    value = 1  # Start from 1 instead of 0
     notsend = 0
-    while value < count:
+    while value <= count:
         headers = {
             'Host': 'ngl.link',
             'sec-ch-ua': '"Google Chrome";v="113", "Chromium";v="113", "Not-A.Brand";v="24"',
@@ -61,11 +61,13 @@ def ngl(nglusername, message, count, use_proxy):
         try:
             response = requests.post('https://ngl.link/api/submit', headers=headers, data=data, proxies=proxies)
             if response.status_code == 200:
-                notsend = 0
+                socketio.emit('log', {'message': f"Send => {value}"})
                 value += 1
             else:
                 notsend += 1
+                socketio.emit('log', {'message': "Not Send"})
             if notsend == 4:
+                socketio.emit('log', {'message': "Changing information"})
                 deviceId()
                 UserAgent()
                 if use_proxy:
